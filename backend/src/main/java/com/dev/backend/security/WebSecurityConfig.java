@@ -56,8 +56,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
-				.antMatchers("/api/**").permitAll().antMatchers("/books/**").hasAnyAuthority("SUPER_USER", "ADMIN_USER")
-				.antMatchers("/user/**").hasAnyAuthority("SUPER_USER", "ADMIN_USER").anyRequest().authenticated();
+				.antMatchers("/api/**").permitAll().antMatchers("/books/showAllBooks").permitAll()
+				.antMatchers("/books/**").hasAnyAuthority("SUPER_USER", "ADMIN_USER", "SITE_USER")
+				.antMatchers("/user/**").hasAnyAuthority("SUPER_USER", "ADMIN_USER", "SITE_USER").anyRequest()
+				.authenticated();
 
 		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}

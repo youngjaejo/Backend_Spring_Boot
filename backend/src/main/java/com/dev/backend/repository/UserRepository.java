@@ -15,7 +15,7 @@ import com.dev.backend.model.*;
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query(value = "select c from User c where c.email like %:keyword%")
-    public User findByEmail2(@Param("keyword") String keyword);
+    public User findByAEmail(@Param("keyword") String keyword);
 
     @Query(value = "select c from User c where c.email like %:keyword%")
     public List<User> findByEmails(@Param("keyword") String keyword);

@@ -13,6 +13,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.JoinColumn;
+
 @Entity
 @Table(name = "book")
 public class Book {
@@ -29,8 +30,8 @@ public class Book {
     private String img_name;
     private int quantity;
     @ManyToMany()
-	@JoinTable(name = "user_cart", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-	private Set<User> cart;
+    @JoinTable(name = "user_cart", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> cart;
 
     public Book() {
 
@@ -63,15 +64,19 @@ public class Book {
     public void setId(int id) {
         this.id = id;
     }
+
     public int getId() {
         return id;
     }
+
     public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
+
     public String getIsbn() {
         return isbn;
     }
+
     public String getTitle() {
         return title;
     }
@@ -79,12 +84,15 @@ public class Book {
     public double getPrice() {
         return price;
     }
+
     public String getAuthor() {
         return author;
     }
+
     public void setPrice(double price) {
         this.price = price;
     }
+
     public void setAuthor(String author) {
         this.author = author;
     }
@@ -94,13 +102,14 @@ public class Book {
     }
 
     public String getCart() {
-		
-		String result="SITE_USER";
-			return result;	
-	}
-	public void setCart(Set<User> cart) {
-        
-		this.cart.add(cart.iterator().next());
-     
-	}
- }
+
+        String result = "SITE_USER";
+        return result;
+    }
+
+    public void setCart(Set<User> cart) {
+
+        this.cart.add(cart.iterator().next());
+
+    }
+}

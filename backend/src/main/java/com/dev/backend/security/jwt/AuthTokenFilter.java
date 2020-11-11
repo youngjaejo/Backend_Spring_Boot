@@ -15,10 +15,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.dev.backend.security.services.UserDetailsImpl;
 import com.dev.backend.security.services.UserDetailsServiceImpl;
 
+@CrossOrigin(origins = "https://www.yjportfolio.com")
 public class AuthTokenFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtUtils jwtUtils;
@@ -33,15 +36,17 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		try {
 			String jwt = parseJwt(request);
-			System.out.println(jwt);
+			System.out.println("***Jettoken: " + jwt);
 			if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 				String username = jwtUtils.getUserNameFromJwtToken(jwt);
-				System.out.println(username);
+				System.out.println("***UserName: " + username);
 
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-				System.out.println(userDetails.getAuthorities());
+				UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+
+				System.out.println("***UserName:" + userDetailsImpl.getId());
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-						userDetails, null, userDetails.getAuthorities());
+						userDetailsImpl, null, userDetailsImpl.getAuthorities());
 				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 				SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -57,7 +62,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	private String parseJwt(HttpServletRequest request) {
 
 		String headerAuth = request.getHeader("Authorization");
-		System.out.println(headerAuth);
+		System.out.println("***headerAuth:" + headerAuth);
 		if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
 			return headerAuth.substring(7, headerAuth.length());
 		}

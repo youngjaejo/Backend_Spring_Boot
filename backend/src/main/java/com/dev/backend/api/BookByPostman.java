@@ -2,18 +2,22 @@ package com.dev.backend.api;
 
 import com.dev.backend.model.Book;
 import com.dev.backend.model.User;
+import com.dev.backend.payload.request.ContactMe;
 import com.dev.backend.payload.request.LoginRequest;
-
+import com.dev.backend.payload.request.VertificationNumber;
 import com.dev.backend.payload.response.JwtResponse;
 import com.dev.backend.repository.BookRepository;
 import com.dev.backend.repository.RoleRepository;
 import com.dev.backend.repository.UserRepository;
 import com.dev.backend.security.jwt.JwtUtils;
 import com.dev.backend.security.services.UserDetailsImpl;
+import com.dev.backend.service.UserService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 
 import java.net.URI;
@@ -37,6 +41,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+@CrossOrigin(origins = "https://www.yjportfolio.com")
 @Controller
 @RequestMapping("/api")
 public class BookByPostman {
@@ -53,7 +58,10 @@ public class BookByPostman {
   PasswordEncoder encoder;
   @Autowired
   private BookRepository bookRepository;
-
+  @Autowired
+  private JavaMailSender emailSender;
+  @Autowired
+  private UserService userService;
   // For Postman
   @Autowired
   JwtUtils jwtUtils;
@@ -77,7 +85,40 @@ public class BookByPostman {
     System.out.println(userDetails.getUsername());
 
     return ResponseEntity
-        .ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        .ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getName(), roles));
+  }
+
+  @PostMapping("/register")
+  public ResponseEntity<?> registerUser(@Valid @RequestBody User user) throws URISyntaxException {
+
+    User result = userService.saveUser(user);
+
+    return ResponseEntity.created(new URI("/user/register" + result.getId())).body(result);
+  }
+
+  @PostMapping("/sendEmail")
+  public void sendingEmail(@Valid @RequestBody VertificationNumber numbers) {
+    System.out.println(numbers.getEmail() + " " + numbers.getNumber());
+    SimpleMailMessage message = new SimpleMailMessage();
+
+    message.setTo(numbers.getEmail());
+    message.setSubject("bookstore");
+    message.setText("Your Vertification Code is " + numbers.getNumber());
+    emailSender.send(message);
+
+  }
+
+  @PostMapping("/contactme")
+  public void contactMe(@Valid @RequestBody ContactMe contact) {
+    System.out.println(contact.getName());
+    SimpleMailMessage message = new SimpleMailMessage();
+
+    message.setTo("goodstanjo@gmail.com");
+    message.setSubject(contact.getName() + " contacted me from my App");
+    message.setText("Name:" + contact.getName() + "\n" + "Phone Number: " + contact.getPhoneNumber() + "\n" + "email: "
+        + contact.getEmail() + "\n" + "Message" + "\n\n" + contact.getMsg());
+    emailSender.send(message);
+
   }
 
   // @PostMapping("/register")

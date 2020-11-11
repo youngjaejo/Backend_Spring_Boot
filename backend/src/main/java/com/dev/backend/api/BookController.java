@@ -1,7 +1,7 @@
 package com.dev.backend.api;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 
@@ -11,25 +11,26 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.dev.backend.model.Book;
+import com.dev.backend.model.User;
 import com.dev.backend.repository.BookRepository;
+import com.dev.backend.service.UserService;
+
 import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import java.io.BufferedOutputStream;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
+
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.validation.Valid;
@@ -38,6 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+@CrossOrigin(origins = "https://www.yjportfolio.com")
 @Controller
 @RequestMapping("/books")
 public class BookController {
@@ -60,14 +62,6 @@ public class BookController {
   public List<Book> viewHomePage() {
     List<Book> listBooks = (List<Book>) bookRepository.findAll();
     return listBooks;
-  }
-
-  @RequestMapping("/addNewBook")
-  public String showNewBookFrom(Model model) {
-    Book book = new Book();
-
-    model.addAttribute("book", book);
-    return "Book_Register";
   }
 
   @PostConstruct
@@ -124,12 +118,6 @@ public class BookController {
       s3Client.putObject(
           new PutObjectRequest(bucketName, fileName, convFile).withCannedAcl(CannedAccessControlList.PublicRead));
 
-      // String filePath=Paths.get(uploadDirectory, fileName).toString();
-      // BufferedOutputStream stream = new
-      // BufferedOutputStream(newFileOutputStream(new File(filePath)));
-      // stream.write(file.getBytes());
-      // stream.close();
-
       book.setImg_name(fileName);
       Book result = bookRepository.save(book);
       convFile.delete();
@@ -141,10 +129,6 @@ public class BookController {
     } catch (IOException a) {
       return ResponseEntity.ok().build();
     }
-    // System.out.println(book.getId());
-    // Book result = bookRepository.save(book);
-    // return ResponseEntity.created(new URI("/books/editBook" +
-    // result.getId())).body(result);
 
   }
 
@@ -153,17 +137,6 @@ public class BookController {
 
     Book result = bookRepository.save(book);
     return ResponseEntity.created(new URI("/books/editBook" + result.getId())).body(result);
-
-    // String filePath=Paths.get(uploadDirectory, fileName).toString();
-    // BufferedOutputStream stream = new
-    // BufferedOutputStream(newFileOutputStream(new File(filePath)));
-    // stream.write(file.getBytes());
-    // stream.close();
-
-    // System.out.println(book.getId());
-    // Book result = bookRepository.save(book);
-    // return ResponseEntity.created(new URI("/books/editBook" +
-    // result.getId())).body(result);
 
   }
 
@@ -178,51 +151,14 @@ public class BookController {
     return ResponseEntity.ok().build();
   }
 
-  @RequestMapping("/searchByBook")
-  public ModelAndView searchByBook(@RequestParam String keyword) {
-    ModelAndView mav = new ModelAndView("Book_search");
-    List<Book> result = bookRepository.searchByBook(keyword);
-    mav.addObject("result", result);
-    return mav;
-  }
+  // @GetMapping("/searchByTitle/{keyword}")
+  // @ResponseBody
+  // public List<Book> searchByTitle(@PathVariable(name = "keyword") String
+  // keyword) {
+  // System.out.println("aa");
+  // List<Book> result = bookRepository.searchByTitle(keyword);
 
-  @RequestMapping("/searchByIsbn")
-  public ModelAndView searchByIsbn(@RequestParam String keyword) {
-    ModelAndView mav = new ModelAndView("Book_search");
-    List<Book> result = bookRepository.searchByIsbn(keyword);
-    mav.addObject("result", result);
-    return mav;
-  }
-
-  @GetMapping("/searchByTitle/{keyword}")
-  @ResponseBody
-  public List<Book> searchByTitle(@PathVariable(name = "keyword") String keyword) {
-    System.out.println("aa");
-    List<Book> result = bookRepository.searchByTitle(keyword);
-
-    return result;
-  }
-
-  @RequestMapping("/searchByCategory")
-  public ModelAndView searchByCategory(@RequestParam String keyword) {
-    ModelAndView mav = new ModelAndView("Book_search");
-    List<Book> result = bookRepository.searchByCategory(keyword);
-    mav.addObject("result", result);
-    return mav;
-  }
-
-  @RequestMapping("/searchByAuthor")
-  public ModelAndView searchByAuthor(@RequestParam String keyword) {
-    ModelAndView mav = new ModelAndView("Book_search");
-    List<Book> result = bookRepository.searchByAuthor(keyword);
-    mav.addObject("result", result);
-    return mav;
-  }
-
-  @RequestMapping("/toMain")
-  public String toMain() {
-
-    return "redirect:/main/mainpage";
-  }
+  // return result;
+  // }
 
 }

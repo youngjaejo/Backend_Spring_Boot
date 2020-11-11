@@ -53,14 +53,26 @@ public class User {
 	@ManyToMany()
 	@JoinTable(name = "auth_user_role", joinColumns = @JoinColumn(name = "auth_user_id"), inverseJoinColumns = @JoinColumn(name = "auth_role_id"))
 	private Set<Role> roles;
-	// @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-	// @JoinTable(name = "user_address", joinColumns = @JoinColumn(name =
-	// "auth_user_id"), inverseJoinColumns = @JoinColumn(name = "address_id"))
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<Address> addresses = new HashSet<>();
+	@ManyToMany()
+	@JoinTable(name = "user_cart", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+	private Set<Book> cart = new HashSet<>();
 
 	public int getId() {
 		return id;
+	}
+
+	public Set<Book> getCart() {
+		return cart;
+	}
+
+	public void setCart(Set<Book> cart) {
+		this.cart = cart;
+	}
+
+	public void addCart(Set<Book> book) {
+		this.cart.add(book.iterator().next());
 	}
 
 	public Set<Address> getAddresses() {

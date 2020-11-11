@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import com.dev.backend.model.User;
 
 import com.dev.backend.repository.UserRepository;
 import com.dev.backend.repository.AddressRepository;
+import com.dev.backend.repository.BookRepository;
 import com.dev.backend.repository.RoleRepository;
 
 @Service
@@ -27,7 +30,8 @@ public class UserServiceImp implements UserService {
 	RoleRepository roleRepository;
 	@Autowired
 	UserRepository userRepository;
-
+	@Autowired
+	BookRepository bookRepository;
 	@Autowired
 	AddressRepository addressRepository;
 
@@ -92,11 +96,38 @@ public class UserServiceImp implements UserService {
 	@Override
 	public boolean isUserAlreadyPresent(User user) {
 
-		User email = userRepository.findByEmail2(user.getEmail());
+		User email = userRepository.findByAEmail(user.getEmail());
 		if (email != null)
 			return true;
 		else
 			return false;
 	}
 
+	@Override
+	public void saveInCart(User user) {
+		int bookId = user.getCart().iterator().next().getId();
+		User temUser = userRepository.getOne(user.getId());
+		Book book = bookRepository.getOne(bookId);
+		temUser.addCart(new HashSet<Book>(Arrays.asList(book)));
+		userRepository.save(temUser);
+	}
+
+	@Override
+	public User getCurrentUser() {
+
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		String userName = ((UserDetails) principal).getUsername();
+		User user = userRepository.findByAEmail(userName);
+		return user;
+
+	}
+
+	@Override
+	public void deleteABook(int id) {
+		User user = getCurrentUser();
+		Book book = bookRepository.getOne(id);
+		user.getCart().remove(book);
+		userRepository.save(user);
+
+	}
 }

@@ -25,8 +25,9 @@ public class JwtUtils {
 
 		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 		System.out.println("userPrincipal:" + userPrincipal.getUsername());
-		return Jwts.builder().setSubject((userPrincipal.getEmail())).setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + (1000 * 60 * 1000)))
+
+		return Jwts.builder().setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
+				.setExpiration(new Date((new Date()).getTime() + (1000 * 60 * 60)))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	}
 
